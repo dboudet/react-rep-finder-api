@@ -43,3 +43,12 @@ exports.createUser = (req,res) => {
         .then(docRef => res.send({id: docRef.id}))
         .catch(err => res.status(500).send(err))
 }
+
+exports.updateUser = (req,res) => {
+    const db = connectDb()
+    db.collection('users')
+        .doc(req.params.userId)
+        .update(req.body)
+        .then(docRef => res.send({id: docRef.id}))
+        .catch(err => res.status(500).send('User could not be updated.'))
+}
