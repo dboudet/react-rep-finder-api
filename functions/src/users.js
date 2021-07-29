@@ -10,13 +10,36 @@ function connectDb() {
     return admin.firestore()
 }
 
-exports.createUser = (req,res) => {
-    if(!req.body) {
-        res.status(401).send('Invalid Request')
-        return
-    }
+exports.getUser = (req, res) => {
     const db = connectDb()
-    db.collection('users').add(req.body)
-        .then( () => res.status(201).send({message: 'User created'}))
-        .catch( err => res.status(500).send(err))
+
+    db.collection('users')
+        .where('email', '==', req.params.email)
+        .get()
+        .then((snapshot) => {
+            snapshot.forEach((doc) => {
+                const user = doc.data()
+                user.id = doc.id
+                res.status(200).json({
+                    status: 'success',
+                    data: user,
+                    message: 'User loaded successfully',
+                    statusCode: 200
+                })
+            })
+        })
+        .catch(err => res.status(500).send('User could not be found'))
+}
+
+exports.createUser = (req,res) => {
+    // if(!req.body) {
+    //     res.send('Invalid Request')
+    //     return
+    // }
+    console.log('running function ---->', req.body)
+    const db = connectDb()
+    db.collection('users')
+        .add(req.body)
+        .then(docRef => res.send({id: docRef.id}))
+        .catch(err => res.status(500).send(err))
 }
